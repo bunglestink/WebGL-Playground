@@ -1,4 +1,8 @@
-define(['gl/gl-version', 'gl/shaders/fragment', 'gl/shaders/vertex'], function (webGlVersion, fragmentShaderScript, vertexShaderScript) {
+define(['gl/gl-version', 'gl/gl-matrix', 'gl/shaders/fragment', 'gl/shaders/vertex'], function (webGlVersion, glMatrix, fragmentShaderScript, vertexShaderScript) {
+
+	var mat4 = glMatrix.mat4,
+		pMatrix = mat4.create(),
+		mvMatrix = mat4.create();
 	
 	function initGl(canvas) {
 		var gl;
@@ -59,9 +63,48 @@ define(['gl/gl-version', 'gl/shaders/fragment', 'gl/shaders/vertex'], function (
 	}
 	
 	
+	function createSurfaceBuffer(gl, verticies) {
+		var vertexPositionBuffer = gl.createBuffer();
+		
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticies), gl.STATIC_DRAW);
+		vertexPositionBuffer.itemSize = 3;
+		vertexPositionBuffer.numItems = verticies.length / 3;
+		
+		return vertexPositionBuffer;
+	}
+	
+	
+	function drawSurface(gl, surfaceBuffer, position, shaderProgram) {
+		mat4.identity(mvMatrix);
+
+        mat4.translate(mvMatrix, position);
+        gl.bindBuffer(gl.ARRAY_BUFFER, surfaceBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, surfaceBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        
+		gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+		
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, surfaceBuffer.numItems);
+	}
+	
+	function clearScene(gl) {
+		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+	}
+	
+	
 	// public interface
 	return {
+		// initialization
 		initGl: initGl,
-		createShaderProgram: createShaderProgram
+		createShaderProgram: createShaderProgram,
+		createSurfaceBuffer: createSurfaceBuffer,
+		
+		// drawing
+		drawSurface: drawSurface,
+		clearScene: clearScene
 	};
 });
