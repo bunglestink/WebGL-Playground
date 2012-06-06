@@ -4,7 +4,7 @@ define(['gl/gl-lib', 'gl/gl-matrix'], function (glLib, glMatrix) {
 		mvMatrix = mat4.create(),
 		distance = -7.0,
 		direction = -100,
-		canvas, gl, shaderProgram, triangleVertexPositionBuffer;
+		canvas, gl, shaderProgram, triangleVertexPositionBuffer, mainLoopInterval;
 	
 	function createTriangleBuffer(gl) {
 		var vertexPositionBuffer = gl.createBuffer(),
@@ -82,9 +82,13 @@ define(['gl/gl-lib', 'gl/gl-matrix'], function (glLib, glMatrix) {
 			
 			lastTime = new Date().getTime();
 			lastTime = mainLoop(gl, lastTime);
-			setInterval(function () {
+			mainLoopInterval = setInterval(function () {
 				lastTime = mainLoop(gl, lastTime);
 			}, 1);
+		},
+		
+		stop: function () {
+			clearInterval(mainLoopInterval);
 		}
 	};
 });

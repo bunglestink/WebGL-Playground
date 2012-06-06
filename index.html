@@ -8,6 +8,7 @@
 body 			{ background-color: #333; }
 canvas 			{ border: #000 solid 1px;  cursor: none; }
 #game-container { text-align: center; }
+#btnStop		{ display: none; }
 </style>
 
 
@@ -18,10 +19,20 @@ require.config({
 });
 require(['main'], function (main) {
 	var canvas = document.getElementById('game-area'),
-		btnRun = document.getElementById('btnRun');
+		btnRun = document.getElementById('btnRun'),
+		btnStop = document.getElementById('btnStop');
 
 	main.init(canvas);
-	btnRun.onclick = main.run;
+	btnRun.onclick = function () {
+		main.run();
+		btnRun.style.display = 'none';
+		btnStop.style.display = 'inline-block';
+	}
+	btnStop.onclick = function () {
+		main.stop();
+		btnRun.style.display = 'inline-block';
+		btnStop.style.display = 'none';
+	}
 });
 </script>
 
@@ -32,6 +43,7 @@ require(['main'], function (main) {
 	</canvas>
 	<div>
 		<button id="btnRun">Run it!</button>
+		<button id="btnStop">Stop</button>
 	</div>
 </div>
 </body>
